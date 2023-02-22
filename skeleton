@@ -1,0 +1,57 @@
+import pygame
+import random
+import os
+pygame.init() # Startar pygame modulen
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (45,20) 
+win_width = 1000
+win_height = 800
+spel = pygame.display.set_mode((win_width, win_height)) 
+
+
+ADDENEMY = pygame.USEREVENT + 1 # Eventet som sker då en fiende läggs till
+pygame.time.set_timer(ADDENEMY, 1500) # Hur stor delay (ms) tills nästa fiende spawnar
+
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("assets/alien2.png")
+        self.rect = self.image.get_rect()
+        self.rect.center = (300, 600)
+        self.speed = 5
+
+    def update(self): # Körs varje tick
+        pass
+
+def redrawGameWindow(): # Här är alla ritkommandon, för att hålla mainloopen ren och göra koden överskådlig
+    pygame.draw.rect(spel, (0,0,0),(0,0,win_width,win_height))
+    all_sprites.update() 
+    all_sprites.draw(spel) # Målar spriten
+
+
+clock = pygame.time.Clock()
+all_sprites = pygame.sprite.Group()
+prey = pygame.sprite.Group()
+player = Player()
+all_sprites.add(player)
+run = True
+while run:  # Mainloop (körs varje tick)
+    clock.tick(60)  # Spelets "klocka", alltså ticks per sekund (fps)
+    for event in pygame.event.get():  # Kollar om ett event har skett
+        if event.type == pygame.QUIT:  # Stänger av spelet utan crash
+            run = False
+        elif (event.type == ADDENEMY) and not tutorial and not intro and not splash:
+            new_enemy = Enemy()
+            enemies.add(new_enemy)
+            all_sprites.add(new_enemy)
+    for bullet in bullets:  # En loop som kollar alla skott mot ett gäng variabler varje tick
+        if pygame.sprite.spritecollideany(bullet, enemies):  # Kollar om skottet träffat en fiende
+            for enemy in enemies:  # En loop som kollar alla fiender mot ett gäng variabler varje tick
+                if pygame.sprite.spritecollideany(enemy, bullets):  # Kollar om fienden blivit träffad av ett skott
+                    bullet.kill()  # Tar bort skottet
+                    enemy.kill()  # och fienden...
+                    Player.points += 1
+
+        redrawGameWindow()
+
+
+pygame.quit()
